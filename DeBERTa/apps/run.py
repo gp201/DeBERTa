@@ -17,6 +17,7 @@ from collections.abc import Mapping, Sequence
 import argparse
 import random
 import time
+import wandb
 
 import numpy as np
 import math
@@ -100,7 +101,7 @@ def train_model(args, model, device, train_data, eval_data, run_eval_fn, train_f
       loss_fn = get_adv_loss_fn() if args.vat_lambda>0 else _loss_fn
   
     trainer = DistributedTrainer(args, args.output_dir, model, device, data_fn, loss_fn = loss_fn, eval_fn = eval_fn, dump_interval = args.dump_interval)
-    trainer.train()
+    trainer.train(args=args)
 
   if train_fn is None:
     train_fn = _train_fn
@@ -130,6 +131,8 @@ def calc_metrics(predicts, labels, eval_loss, eval_item, eval_results, args, nam
         logger.info("  %s = %s", key, str(result[key]))
         writer.write("%s = %s\n" % (key, str(result[key])))
         tb_metrics[f'{name}/{key}'] = result[key]
+    if args.wandb_project is not None:
+      wandb.log(tb_metrics, step=steps)
 
     if predict_fn is not None:
       predict_fn(predicts, args.output_dir, name, prefix)
@@ -299,6 +302,12 @@ def main(args):
       fs.write(model.config.to_json_string() + '\n')
     shutil.copy(vocab_path, args.output_dir)
   logger.info("Model config {}".format(model.config))
+  if args.wandb_project is not None:
+    wandb.watch(model)
+    wandb.config.update({
+      'model_config': model.config.to_dict(),
+      'args': args.__dict__
+    })
   device = initialize_distributed(args)
   if not isinstance(device, torch.device):
     return 0
@@ -460,6 +469,21 @@ def build_argument_parser():
             default=False,
             type=boolean_string,
             help="Whether to export model to ONNX format.")
+  
+  parser.add_argument('--wandb_project',
+            default=None,
+            type=str,
+            help="The project name of wandb")
+
+  parser.add_argument('--wandb_tags',
+            default="dev",
+            type=str,
+            help="The tags of wandb")
+  
+  parser.add_argument('--model_name',
+            default='DeBERTa',
+            type=str,
+            help="The model name of wandb")
 
   return parser
 
@@ -468,6 +492,10 @@ if __name__ == "__main__":
   parser.parse_known_args()
 
   args = parser.parse_args()
+
+  if args.wandb_project is not None:
+    wandb.init(project=args.wandb_project, name=args.model_name, tags=args.wandb_tags.split(','), dir=args.output_dir)
+
   os.makedirs(args.output_dir, exist_ok=True)
   logger = set_logger(args.task_name, os.path.join(args.output_dir, 'training_{}.log'.format(args.task_name)))
   logger.info(args)

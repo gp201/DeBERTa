@@ -12,6 +12,7 @@ import random
 import time
 import numpy as np
 import pdb
+import wandb
 from collections import defaultdict, OrderedDict
 from collections.abc import Mapping, Sequence
 from torch.utils.data import DataLoader
@@ -34,8 +35,9 @@ def set_random_seed(seed, cpu_only=False):
     torch.cuda.manual_seed_all(seed)
 
 class TrainerState:
-  def __init__(self, training_steps, name=None):
+  def __init__(self, training_steps, name=None, args=None):
     self.__dict__ = defaultdict(float)
+    self.args = args
     self.loss = 0.0
     self.examples = 0
     self.steps = 0
@@ -68,6 +70,11 @@ class TrainerState:
       tag = None
     logger.info('{}[{:0.1f}%][{:0.2f}h] Steps={}, loss={}, examples={}, loss_scale={:0.1f}, {:0.1f}s'.format(tag, 100*self.steps/self.num_training_steps, \
       (self.num_training_steps - self.steps)*(start-end)/((self.steps-self._last_report_step)*3600), self.steps, self.loss/self.steps, self.examples, self.loss_scale, end-start))
+    if self.args.wandb_project is not None:
+      if tag is not None:
+        wandb.log({f'{tag}/loss': self.loss/self.steps, f'{tag}/loss_scale': self.loss_scale, f'{tag}/examples': self.examples, f'{tag}/steps': self.steps, f'{tag}/time': end-start})
+      else:
+        wandb.log({'loss': self.loss/self.steps, 'loss_scale': self.loss_scale, 'examples': self.examples, 'steps': self.steps, 'time': end-start})
     self._last_report_time = end
     self._last_report_step = self.steps
 
@@ -98,7 +105,7 @@ class DistributedTrainer:
 
     self.output_dir = output_dir
     self.init_fn = init_fn
-    self.trainer_state = TrainerState(self.training_steps, name = name)
+    self.trainer_state = TrainerState(self.training_steps, name = name, args = args)
     self.dump_interval = dump_interval
 
     self.model = self._setup_model(args, model)

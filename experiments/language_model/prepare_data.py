@@ -1,4 +1,8 @@
 # coding: utf-8
+
+import sys
+sys.path.append('../../')
+
 from DeBERTa import deberta
 import sys
 import argparse

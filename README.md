@@ -2,6 +2,40 @@
 
 This repository is the official implementation of [ **DeBERTa**: **D**ecoding-**e**nhanced **BERT** with Disentangled **A**ttention ](https://arxiv.org/abs/2006.03654) and [DeBERTa V3: Improving DeBERTa using ELECTRA-Style Pre-Training with Gradient-Disentangled Embedding Sharing](https://arxiv.org/abs/2111.09543)
 
+## Personal Note
+
+This is a fork of the original DeBERTa repository. I have made some changes to the code to make it work on my local machine.
+
+To Run the code, follow the instructions below:
+
+1. Clone the repository and navigate to the root directory of the repository.
+```bash
+git clone https://github.com/gp201/DeBERTa.git
+cd DeBERTa
+```
+
+2. build the docker image using the command:
+```bash
+docker build -t deberta -f docker/Dockerfile.new .
+```
+
+3. Run the docker container using the command:
+```bash
+docker run --runtime nvidia --ipc=host -it --rm -v `pwd`:/DeBERTa deberta bash
+```
+> Note: the `--ipc=host` flag is necessary to allow shared memory access between the host and the container. This is necessary for the code to run.
+
+4. Once inside the container, install the code using the following commands:
+```bash
+python setup.py install
+python setup.py build
+```
+
+5. To run the Replace Token Detection (RTD) task, use the following command:
+```bash
+bash experiments/language_model/rtd.sh <model_name>
+```
+
 ## News
 ### 03/18/2023
 - [DeBERTaV3](https://openreview.net/forum?id=sE7-XhLxHA) paper is accepted by ICLR 2023.

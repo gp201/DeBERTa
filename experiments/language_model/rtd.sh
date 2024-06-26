@@ -2,6 +2,7 @@
 SCRIPT=$(readlink -f "$0")
 SCRIPT_DIR=$(dirname "$SCRIPT")
 cd $SCRIPT_DIR
+DATE=$(date '+%Y-%m-%d|%H:%M:%S')
 
 cache_dir=/tmp/DeBERTa/RTD/
 
@@ -16,18 +17,22 @@ function setup_wiki_data(){
 	fi
 
 	if [[ ! -e  $data_dir/test.txt ]]; then
-		wget -q https://s3.amazonaws.com/research.metamind.io/wikitext/wikitext-103-v1.zip -O $cache_dir/wiki103.zip
-		unzip -j $cache_dir/wiki103.zip -d $cache_dir/wiki103
+		# wget -q https://s3.amazonaws.com/research.metamind.io/wikitext/wikitext-103-v1.zip -O $cache_dir/wiki103.zip
+		# unzip -j $cache_dir/wiki103.zip -d $cache_dir/wiki103
+		wget -q https://dax-cdn.cdn.appdomain.cloud/dax-wikitext-103/1.0.1/wikitext-103.tar.gz -O $cache_dir/wiki103.tar.gz
+		tar -xzf $cache_dir/wiki103.tar.gz -C $cache_dir
 		mkdir -p $data_dir
-		python ./prepare_data.py -i $cache_dir/wiki103/wiki.train.tokens -o $data_dir/train.txt --max_seq_length $max_seq_length
-		python ./prepare_data.py -i $cache_dir/wiki103/wiki.valid.tokens -o $data_dir/valid.txt --max_seq_length $max_seq_length
-		python ./prepare_data.py -i $cache_dir/wiki103/wiki.test.tokens -o $data_dir/test.txt --max_seq_length $max_seq_length
+		python ./prepare_data.py -i $cache_dir/wikitext-103/wiki.train.tokens -o $data_dir/train.txt --max_seq_length $max_seq_length
+		python ./prepare_data.py -i $cache_dir/wikitext-103/wiki.valid.tokens -o $data_dir/valid.txt --max_seq_length $max_seq_length
+		python ./prepare_data.py -i $cache_dir/wikitext-103/wiki.test.tokens -o $data_dir/test.txt --max_seq_length $max_seq_length
 	fi
 }
 
 setup_wiki_data
 
 Task=RTD
+
+config=./experiments/language_model
 
 init=$1
 tag=$init
@@ -48,7 +53,7 @@ case ${init,,} in
 		;;
 	deberta-v3-xsmall)
 	parameters=" --num_train_epochs 1 \
-	--model_config rtd_xsmall.json \
+	--model_config ${config}/rtd_xsmall.json \
 	--warmup 10000 \
 	--learning_rate 3e-4 \
 	--train_batch_size 64 \
@@ -97,6 +102,10 @@ case ${init,,} in
 		;;
 esac
 
+cd /DeBERTa
+
+NCCL_DEBUG=INFO
+
 python -m DeBERTa.apps.run --model_config config.json  \
 	--tag $tag \
 	--do_train \
@@ -107,4 +116,8 @@ python -m DeBERTa.apps.run --model_config config.json  \
 	--data_dir $data_dir \
 	--vocab_path $cache_dir/spm.model \
 	--vocab_type spm \
-	--output_dir /tmp/ttonly/$tag/$task  $parameters
+	--output_dir /tmp/ttonly/$tag/$task \
+	--wandb_project "gp-deberta" \
+	--wandb_tags "testing" \
+	--model_name $init-$Task-$DATE  $parameters
+
