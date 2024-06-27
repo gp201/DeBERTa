@@ -305,7 +305,7 @@ def main(args):
   if args.wandb_project is not None:
     wandb.watch(model)
     wandb.config.update({
-      'model_config': model.config.to_dict(),
+      'model_config': model.config,
       'args': args.__dict__
     })
   device = initialize_distributed(args)
