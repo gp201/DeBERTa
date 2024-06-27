@@ -34,6 +34,11 @@ WORKDIR /work
 COPY requirements.txt /work/requirements.txt
 RUN pip install -r /work/requirements.txt
 
+WORKDIR /DeBERTa
+
+RUN git config --global --add safe.directory /DeBERTa
+
+
 # #RUN pip3 install -q beautifulsoup4 progressbar2 nltk==3.4.1 html2text
 
 # RUN python -c "import nltk;nltk.download('punkt')"
