@@ -190,7 +190,15 @@ dataset_size = dataset_size, shuffle=True, **kwargs)
     def metrics_fn(logits, labels):
       preds = logits
       acc = (preds==labels).sum()/len(labels)
-      metrics =  OrderedDict(accuracy= acc)
+      skm_acc = accuracy_score(labels, preds)
+      f1 = f1_score(labels, preds, average='macro')
+      precision = precision_score(labels, preds, average='macro')
+      recall = recall_score(labels, preds, average='macro')
+      metrics =  OrderedDict(accuracy= acc,
+        skm_accuracy = skm_acc,
+        f1 = f1,
+        precision = precision,
+        recall = recall)
       return metrics
     return metrics_fn
 
@@ -321,6 +329,9 @@ dataset_size = dataset_size, shuffle=True, **kwargs)
           logger.info("***** Eval results-{}-{} *****".format(name, prefix))
           for key in sorted(result.keys()):
             logger.info("  %s = %s", key, str(result[key]))
+        if args.wandb_project:
+          import wandb
+          wandb.log({f'{name}_{prefix}_{k}':v for k,v in result.items()})
         eval_results[name]=(eval_metric, predicts, labels)
 
       return eval_results
