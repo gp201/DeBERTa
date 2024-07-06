@@ -41,11 +41,11 @@ pretrained_models= {
     'xxlarge-v2': PretrainedModel('deberta-v2-xxlarge', 'spm.model', 'spm'),
     'xlarge-v2-mnli': PretrainedModel('deberta-v2-xlarge-mnli', 'spm.model', 'spm'),
     'xxlarge-v2-mnli': PretrainedModel('deberta-v2-xxlarge-mnli', 'spm.model', 'spm'),
-    'deberta-v3-small': PretrainedModel('deberta-v3-small', 'spm.model', 'spm'),
-    'deberta-v3-base': PretrainedModel('deberta-v3-base', 'spm.model', 'spm'),
-    'deberta-v3-large': PretrainedModel('deberta-v3-large', 'spm.model', 'spm'),
-    'mdeberta-v3-base': PretrainedModel('mdeberta-v3-base', 'spm.model', 'spm'),
-    'deberta-v3-xsmall': PretrainedModel('deberta-v3-xsmall', 'spm.model', 'spm'),
+    'deberta-v3-small': PretrainedModel('deberta-v3-small', 'vocab.txt', 'custom'),
+    'deberta-v3-base': PretrainedModel('deberta-v3-base', 'vocab.txt', 'custom'),
+    'deberta-v3-large': PretrainedModel('deberta-v3-large', 'vocab.txt', 'custom'),
+    'mdeberta-v3-base': PretrainedModel('mdeberta-v3-base', 'vocab.txt', 'custom'),
+    'deberta-v3-xsmall': PretrainedModel('deberta-v3-xsmall', 'vocab.txt', 'custom'),
   }
 
 def download_asset(url, name, tag=None, no_cache=False, cache_dir=None):
@@ -108,7 +108,12 @@ def load_model_state(path_or_pretrained_id, tag=None, no_cache=False, cache_dir=
   return model_state, model_config
 
 def load_vocab(vocab_path=None, vocab_type=None, pretrained_id=None, tag=None, no_cache=False, cache_dir=None):
+  logger.info(f'loading vocab {vocab_path}')
   if pretrained_id and (pretrained_id.lower() in pretrained_models):
+    logger.info('loading pretrained vocab {}'.format(pretrained_id))
+    logger.info('vocab type {}'.format(vocab_type))
+    logger.info('tag {}'.format(tag))
+    logger.info('vocab path {}'.format(vocab_path))
     _tag = tag
     if _tag is None:
       _tag = 'latest'
@@ -118,12 +123,17 @@ def load_vocab(vocab_path=None, vocab_type=None, pretrained_id=None, tag=None, n
       cache_dir = os.path.join(pathlib.Path.home(), f'.~DeBERTa/assets/{_tag}/{pretrained.name}')
     os.makedirs(cache_dir, exist_ok=True)
     vocab_type = pretrained.vocab_type
+    logger.info('vocab type {}'.format(vocab_type))
+    logger.info('cache dir {}'.format(cache_dir))
+    logger.info('pretrained {}'.format(pretrained))
     url = pretrained.vocab_url
     outname = os.path.basename(url)
     vocab_path =os.path.join(cache_dir, outname)
+    logger.info("Checking if vocab exists {}".format(vocab_path))
     if (not os.path.exists(vocab_path)) or no_cache:
       asset = download_asset(url, outname, tag=tag, no_cache=no_cache, cache_dir=cache_dir)
   if vocab_type is None:
+    logger.info('loading custom vocab')
     vocab_type = 'spm'
   return vocab_path, vocab_type
 

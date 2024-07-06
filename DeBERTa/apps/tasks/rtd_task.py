@@ -147,6 +147,8 @@ class RTDTask(Task):
   def train_data(self, max_seq_len=512, **kwargs):
     data = self.load_data(os.path.join(self.data_dir, 'train.txt'))
     examples = ExampleSet(data)
+    # print 1 example
+    logger.info(f'Example: {examples[0]}')
     if self.args.num_training_steps is None:
       dataset_size = len(examples)
     else:

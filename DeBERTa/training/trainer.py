@@ -35,8 +35,9 @@ def set_random_seed(seed, cpu_only=False):
     torch.cuda.manual_seed_all(seed)
 
 class TrainerState:
-  def __init__(self, training_steps, name=None):
+  def __init__(self, training_steps, name=None, args=None):
     self.__dict__ = defaultdict(float)
+    self.args = args
     self.loss = 0.0
     self.examples = 0
     self.steps = 0
@@ -104,7 +105,7 @@ class DistributedTrainer:
 
     self.output_dir = output_dir
     self.init_fn = init_fn
-    self.trainer_state = TrainerState(self.training_steps, name = name, args = args)
+    self.trainer_state = TrainerState(self.training_steps, name = name, args = self.args)
     self.dump_interval = dump_interval
 
     self.model = self._setup_model(args, model)

@@ -8,9 +8,11 @@
 
 from .spm_tokenizer import *
 from .gpt2_tokenizer import GPT2Tokenizer
+from .custom_tokenizer import *
 
 __all__ = ['tokenizers']
 tokenizers={
     'gpt2': GPT2Tokenizer,
-    'spm': SPMTokenizer
+    'spm': SPMTokenizer,
+    'custom': CustomTokenizer
     }
