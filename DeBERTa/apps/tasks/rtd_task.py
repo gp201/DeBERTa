@@ -333,7 +333,17 @@ dataset_size = dataset_size, shuffle=True, **kwargs)
             logger.info("  %s = %s", key, str(result[key]))
         if args.wandb_project:
           import wandb
-          wandb.log({f'{name}_{prefix}_{k}':v for k,v in result.items()})
+          # also add prefix to result keys
+          step = None
+          try:
+              step = int(prefix.split('-')[0])
+          except:
+              if 'steps' in locals():
+                  step = steps
+
+          if step is not None:
+              result['step'] = step
+          wandb.log({f'{name}_{k}':v for k,v in result.items()})
         eval_results[name]=(eval_metric, predicts, labels)
 
       return eval_results
