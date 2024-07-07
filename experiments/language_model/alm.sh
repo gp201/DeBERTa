@@ -11,6 +11,8 @@ data_dir=$cache_dir/wiki103/spm_$max_seq_length
 
 assets_dir=/root/.~DeBERTa/assets/latest/deberta-v3-base/
 
+mkdir -p $assets_dir
+
 cp /DeBERTa/vocab.txt $assets_dir/vocab.txt
 
 function setup_wiki_data(){
@@ -25,7 +27,6 @@ function setup_wiki_data(){
 		wait
 		tar -xzf $cache_dir/train-test-eval_unpaired.tar.gz -C $cache_dir
 		wait
-		cp /train.txt $cache_dir/train-test-eval_unpaired/train.txt
 		mkdir -p $data_dir
 		python ./prepare_data.py -i $cache_dir/train-test-eval_unpaired/train.txt -o $data_dir/train.txt --max_seq_length $max_seq_length --vocab_path $assets_dir/vocab.txt
 		python ./prepare_data.py -i $cache_dir/train-test-eval_unpaired/eval.txt -o $data_dir/valid.txt --max_seq_length $max_seq_length --vocab_path $assets_dir/vocab.txt
