@@ -15,6 +15,8 @@ import os
 import sys
 import csv
 
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+
 import random
 import torch
 import re
