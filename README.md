@@ -21,7 +21,7 @@ docker build -t deberta -f docker/Dockerfile.new .
 
 3. Run the docker container using the command:
 ```bash
-docker run --runtime nvidia --ipc=host -it --rm -v `pwd`:/DeBERTa deberta bash
+docker run --runtime nvidia --ipc=host -it --rm -v $PWD:/home/deberta/DeBERTa -v $PWD/../models:/home/deberta/models deberta bash
 ```
 > Note: the `--ipc=host` flag is necessary to allow shared memory access between the host and the container. This is necessary for the code to run.
 

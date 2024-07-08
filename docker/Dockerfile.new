@@ -3,6 +3,11 @@ FROM nvcr.io/nvidia/pytorch:20.12-py3
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+# add user
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+ARG USER_NAME=deberta
+
 RUN apt-get update && apt-get install -y vim gawk wget software-properties-common vim-addon-manager locales gdb 
 # RUN apt-get update && apt-get install -y python3.6 python3.6-dev python3.6-doc python3.6-dbg 
 #python-distutils
@@ -11,12 +16,13 @@ RUN locale-gen en_US en_US.UTF-8
 
 RUN apt-get update
 RUN apt-get install -y git build-essential
-RUN apt-get install -y rsync jq sudo net-tools apt-transport-https curl ca-certificates clang libglib2.0-dev
+RUN apt-get install -y rsync jq net-tools apt-transport-https curl ca-certificates clang libglib2.0-dev
 RUN apt-get install -y htop bash-completion libibverbs-dev graphviz libunwind-dev
+RUN apt-get install -y sudo
 
 RUN apt-get install -y openjdk-8-jdk && \
-    echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list && \
-    curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add - && \
+    echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list && \
+    curl https://bazel.build/bazel-release.pub.gpg | apt-key add - && \
 	  apt-get update
 
 # RUN 	curl https://bootstrap.pypa.io/get-pip.py | python3.6 && \
@@ -30,14 +36,22 @@ RUN apt-get install -y openjdk-8-jdk && \
 
 RUN pip install --upgrade setuptools
 
-WORKDIR /work
-COPY requirements.txt /work/requirements.txt
-RUN pip install -r /work/requirements.txt
+RUN groupadd -g $GROUP_ID $USER_NAME
+RUN useradd -u $USER_ID -g $USER_NAME -m $USER_NAME
+RUN echo "$USER_NAME:$USER_NAME" | chpasswd
+RUN usermod -aG sudo $USER_NAME
+RUN echo "$USER_NAME ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-WORKDIR /DeBERTa
+WORKDIR /home/deberta
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
-RUN git config --global --add safe.directory /DeBERTa
+WORKDIR /home/deberta/DeBERTa
 
+RUN git config --global --add safe.directory /home/deberta/DeBERTa
+
+# specify the local user
+USER $USER_NAME
 
 # #RUN pip3 install -q beautifulsoup4 progressbar2 nltk==3.4.1 html2text
 

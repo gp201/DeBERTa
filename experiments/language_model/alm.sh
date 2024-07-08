@@ -1,19 +1,22 @@
 #!/bin/bash
+
+REPO_DIR=$(git rev-parse --show-toplevel)
+
 SCRIPT=$(readlink -f "$0")
 SCRIPT_DIR=$(dirname "$SCRIPT")
 cd $SCRIPT_DIR
 DATE=$(date '+%Y-%m-%d|%H:%M:%S')
 
-cache_dir=/tmp/DeBERTa/RTD/
+cache_dir=~/.cache/deberta
 
 max_seq_length=256
-data_dir=$cache_dir/wiki103/spm_$max_seq_length
+data_dir=$cache_dir/data
 
-assets_dir=/root/.~DeBERTa/assets/latest/deberta-v3-base/
+assets_dir=/home/deberta/.~DeBERTa/assets/latest/deberta-v3-base
 
-mkdir -p $assets_dir
+mkdir -p $assets_dir $data_dir $cache_dir
 
-cp /DeBERTa/vocab.txt $assets_dir/vocab.txt
+cp $REPO_DIR/vocab.txt $assets_dir/vocab.txt
 
 function setup_wiki_data(){
 	task=$1
@@ -27,7 +30,6 @@ function setup_wiki_data(){
 		wait
 		tar -xzf $cache_dir/train-test-eval_unpaired.tar.gz -C $cache_dir
 		wait
-		mkdir -p $data_dir
 		python ./prepare_data.py -i $cache_dir/train-test-eval_unpaired/train.txt -o $data_dir/train.txt --max_seq_length $max_seq_length --vocab_path $assets_dir/vocab.txt
 		python ./prepare_data.py -i $cache_dir/train-test-eval_unpaired/eval.txt -o $data_dir/valid.txt --max_seq_length $max_seq_length --vocab_path $assets_dir/vocab.txt
 		python ./prepare_data.py -i $cache_dir/train-test-eval_unpaired/test.txt -o $data_dir/test.txt --max_seq_length $max_seq_length --vocab_path $assets_dir/vocab.txt
@@ -116,7 +118,7 @@ python -m DeBERTa.apps.run --model_config config.json  \
 	--data_dir $data_dir \
 	--vocab_path $assets_dir/vocab.txt \
 	--vocab_type custom \
-	--output_dir /tmp/ttonly/$tag/$task  $parameters
-	# --wandb_project "gp-deberta" \
-	# --wandb_tags "testing" \
-	# --model_name $init-$Task-$DATE  
+	--output_dir /models \
+	--wandb_project "gp-deberta" \
+	--wandb_tags "testing" \
+	--model_name $init-$Task-$DATE  $parameters
