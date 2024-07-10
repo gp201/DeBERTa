@@ -72,9 +72,9 @@ class TrainerState:
       (self.num_training_steps - self.steps)*(start-end)/((self.steps-self._last_report_step)*3600), self.steps, self.loss/self.steps, self.examples, self.loss_scale, end-start))
     if self.args.wandb_project is not None:
       if tag is not None:
-        wandb.log({f'{tag}/loss': self.loss/self.steps, f'{tag}/loss_scale': self.loss_scale, f'{tag}/examples': self.examples, f'{tag}/steps': self.steps, f'{tag}/time': end-start})
+        wandb.log({f'{tag}/loss': self.loss/self.steps, f'{tag}/loss_scale': self.loss_scale, f'{tag}/examples': self.examples, f'{tag}/steps': self.steps, f'{tag}/time': end-start}, step=self.steps)
       else:
-        wandb.log({'loss': self.loss/self.steps, 'loss_scale': self.loss_scale, 'examples': self.examples, 'steps': self.steps, 'time': end-start})
+        wandb.log({'loss': self.loss/self.steps, 'loss_scale': self.loss_scale, 'examples': self.examples, 'steps': self.steps, 'time': end-start}, step=self.steps)
     self._last_report_time = end
     self._last_report_step = self.steps
 

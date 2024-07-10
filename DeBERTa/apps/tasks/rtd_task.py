@@ -343,9 +343,7 @@ dataset_size = dataset_size, shuffle=True, **kwargs)
               if 'steps' in locals():
                   step = steps
 
-          if step is not None:
-              result['step'] = step
-          wandb.log({f'{name}_{k}':v for k,v in result.items()})
+          wandb.log({f'{name}_{k}':v for k,v in result.items()}, step=step)
         eval_results[name]=(eval_metric, predicts, labels)
 
       return eval_results
