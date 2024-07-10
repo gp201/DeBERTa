@@ -11,8 +11,11 @@ To Run the code, follow the instructions below:
 1. Clone the repository and navigate to the root directory of the repository.
 ```bash
 git clone https://github.com/gp201/DeBERTa.git
+mkdir models
 cd DeBERTa
 ```
+
+We will use the models directory to store the pre-trained models and configurations.
 
 2. build the docker image using the command:
 ```bash
@@ -33,7 +36,7 @@ python setup.py install
 
 5. To run the Replace Token Detection (RTD) task, use the following command:
 ```bash
-bash experiments/language_model/rtd.sh <model_name>
+bash experiments/language_model/alm.sh <model_name>
 ```
 
 ## News
