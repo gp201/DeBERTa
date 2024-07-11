@@ -11,7 +11,7 @@ from tqdm import tqdm
 def tokenize_data(input, output=None, max_seq_length=512, vocab_path=None, vocab_type='custom'):
   p,t=deberta.load_vocab(vocab_path=vocab_path, vocab_type=vocab_type, pretrained_id='deberta-v3-base')
   tokenizer=deberta.tokenizers[t](p)
-  print(f'Loaded tokenizer {t} with {len(p)} tokens')
+  print(f'Loaded tokenizer {t} with tokens from {p}')
   print(f'Tokeniser class {tokenizer.__class__}')
   if output is None:
     output=input + '.spm'

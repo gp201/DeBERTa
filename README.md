@@ -31,7 +31,7 @@ docker run --runtime nvidia --ipc=host -it --rm -v $PWD:/home/deberta/DeBERTa -v
 4. Once inside the container, install the code using the following commands:
 ```bash
 python setup.py build
-python setup.py install
+sudo `which python` setup.py install
 ```
 
 5. To run the Replace Token Detection (RTD) task, use the following command:
