@@ -473,7 +473,7 @@ def build_argument_parser():
   
   parser.add_argument('--wandb',
             default=False,
-            type=boolean_string,
+            action='store_true',
             help="Whether to use wandb for logging.")
 
   return parser

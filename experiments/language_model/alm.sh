@@ -130,6 +130,4 @@ python -m DeBERTa.apps.run --model_config config.json  \
 	--vocab_path $assets_dir/vocab.txt \
 	--vocab_type custom \
 	--output_dir ~/models \
-	--wandb_project "gp-deberta" \
-	--wandb_tags "testing" \
-	--model_name $init-$Task-$DATE  $parameters
+	--wandb  $parameters
