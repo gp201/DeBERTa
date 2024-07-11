@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -exo pipefail
+
 REPO_DIR=$(git rev-parse --show-toplevel)
 
 SCRIPT=$(readlink -f "$0")
@@ -108,6 +110,15 @@ case ${init,,} in
 		;;
 esac
 
+
+# WANDB env variables
+export WANDB_JOB_TYPE="Pretrain"
+export WANDB_RUN_GROUP="Testing"
+export WANDB_NAME="DeBERTa-$init-$Task-$DATE"
+export WANDB_PROJECT="gp-deberta"
+export WANDB_TAGS="testing"
+export WANDB_DIR="~/models"
+
 python -m DeBERTa.apps.run --model_config config.json  \
 	--tag $tag \
 	--do_train \
@@ -118,7 +129,7 @@ python -m DeBERTa.apps.run --model_config config.json  \
 	--data_dir $data_dir \
 	--vocab_path $assets_dir/vocab.txt \
 	--vocab_type custom \
-	--output_dir /models \
+	--output_dir ~/models \
 	--wandb_project "gp-deberta" \
 	--wandb_tags "testing" \
 	--model_name $init-$Task-$DATE  $parameters

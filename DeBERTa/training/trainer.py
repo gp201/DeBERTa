@@ -70,7 +70,7 @@ class TrainerState:
       tag = None
     logger.info('{}[{:0.1f}%][{:0.2f}h] Steps={}, loss={}, examples={}, loss_scale={:0.1f}, {:0.1f}s'.format(tag, 100*self.steps/self.num_training_steps, \
       (self.num_training_steps - self.steps)*(start-end)/((self.steps-self._last_report_step)*3600), self.steps, self.loss/self.steps, self.examples, self.loss_scale, end-start))
-    if self.args.wandb_project is not None:
+    if self.args.wandb:
       if tag is not None:
         wandb.log({f'{tag}/loss': self.loss/self.steps, f'{tag}/loss_scale': self.loss_scale, f'{tag}/examples': self.examples, f'{tag}/steps': self.steps, f'{tag}/time': end-start}, step=self.steps)
       else:

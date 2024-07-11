@@ -333,7 +333,7 @@ dataset_size = dataset_size, shuffle=True, **kwargs)
           logger.info("***** Eval results-{}-{} *****".format(name, prefix))
           for key in sorted(result.keys()):
             logger.info("  %s = %s", key, str(result[key]))
-        if args.wandb_project:
+        if args.wandb:
           import wandb
           # also add prefix to result keys
           step = None

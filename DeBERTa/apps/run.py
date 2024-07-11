@@ -131,7 +131,7 @@ def calc_metrics(predicts, labels, eval_loss, eval_item, eval_results, args, nam
         logger.info("  %s = %s", key, str(result[key]))
         writer.write("%s = %s\n" % (key, str(result[key])))
         tb_metrics[f'{name}/{key}'] = result[key]
-    if args.wandb_project is not None:
+    if args.wandb:
       wandb.log(tb_metrics, step=steps)
 
     if predict_fn is not None:
@@ -303,7 +303,7 @@ def main(args):
       fs.write(model.config.to_json_string() + '\n')
     shutil.copy(vocab_path, args.output_dir)
   logger.info("Model config {}".format(model.config))
-  if args.wandb_project is not None:
+  if args.wandb:
     wandb.watch(model)
     wandb.config.update({
       'model_config': json.loads(model.config.to_json_string()),
@@ -471,20 +471,10 @@ def build_argument_parser():
             type=boolean_string,
             help="Whether to export model to ONNX format.")
   
-  parser.add_argument('--wandb_project',
-            default=None,
-            type=str,
-            help="The project name of wandb")
-
-  parser.add_argument('--wandb_tags',
-            default="dev",
-            type=str,
-            help="The tags of wandb")
-  
-  parser.add_argument('--model_name',
-            default='DeBERTa',
-            type=str,
-            help="The model name of wandb")
+  parser.add_argument('--wandb',
+            default=False,
+            type=boolean_string,
+            help="Whether to use wandb for logging.")
 
   return parser
 
@@ -494,8 +484,8 @@ if __name__ == "__main__":
 
   args = parser.parse_args()
 
-  if args.wandb_project is not None:
-    wandb.init(project=args.wandb_project, name=args.model_name, tags=args.wandb_tags.split(','), dir=args.output_dir)
+  if args.wandb:
+    wandb.init()
 
   os.makedirs(args.output_dir, exist_ok=True)
   logger = set_logger(args.task_name, os.path.join(args.output_dir, 'training_{}.log'.format(args.task_name)))
